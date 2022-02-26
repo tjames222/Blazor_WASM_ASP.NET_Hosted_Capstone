@@ -1,0 +1,15 @@
+﻿@inject NavigationManager Navigation
+@code {
+    protected override void OnInitialized()
+    {
+        Log.Information("Redirecting to Login.");
+        try
+        {
+            Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("ERROR: {0}", ex);
+        }
+    }
+}
