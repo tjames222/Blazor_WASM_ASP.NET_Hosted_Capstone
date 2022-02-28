@@ -12,7 +12,7 @@ namespace devSplain.Client
         {
         }
 
-        public override async ValueTask<ClaimsPrincipal> CreateUserAsync(
+        public override async ValueTask<ClaimsPrincipal?> CreateUserAsync(
             RemoteUserAccount account, RemoteAuthenticationUserOptions options)
         {
             try

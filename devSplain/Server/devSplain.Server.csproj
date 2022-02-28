@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>69fdbf58-6142-4952-b59d-ba4e6fbbf452</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,7 @@
     <PackageReference Include="Azure.Storage.Common" Version="12.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.25.0" />
     <PackageReference Include="Okta.AspNetCore" Version="4.0.0" />
     <PackageReference Include="Okta.Sdk" Version="5.4.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
@@ -23,6 +25,14 @@
   <ItemGroup>
     <ProjectReference Include="..\Client\devSplain.Client.csproj" />
     <ProjectReference Include="..\Shared\devSplain.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Development\unsafe_uploads\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
 

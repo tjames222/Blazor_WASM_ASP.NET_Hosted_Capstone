@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using devSplain.Server.Services;
 using Okta.AspNetCore;
 using Radzen;
 using Serilog;
@@ -26,8 +27,8 @@ namespace devSplain.Server
                 services.AddScoped<NotificationService>();
                 services.AddScoped<TooltipService>();
                 services.AddScoped<ContextMenuService>();
-                //services.AddSingleton<ICosmosDbService>(InitializeCosmosClientInstanceUserAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
-                //services.AddSingleton<IInitDataService>(InitializeCosmosClientInstanceAppDataAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
+                services.AddSingleton<ICosmosDbService>(InitializeCosmosClientInstanceUserAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
+                //services.AddSingleton<CosmosDbPostService>(InitializeCosmosClientInstanceAppDataAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
                 //services.AddSingleton<IBlobService>(InitializeAzureBlobClientInstance(Configuration.GetSection("BlobStorage")));
 
                 services.AddRazorPages();
@@ -95,35 +96,35 @@ namespace devSplain.Server
         }
 
         // User container
-        //private static async Task<CosmosDbUserService> InitializeCosmosClientInstanceUserAsync(IConfigurationSection configurationSection)
-        //{
-        //    Log.Information("Connecting to Database and container 1...");
-        //    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-        //    string containerName = configurationSection.GetSection("UserContainerName").Value;
-        //    string account = configurationSection.GetSection("Account").Value;
-        //    string key = configurationSection.GetSection("Key").Value;
-        //    Microsoft.Azure.Cosmos.CosmosClient client = new(account, key);
-        //    CosmosDbUserService cosmosDbService = new(client, databaseName, containerName);
-        //    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-        //    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
+        private static async Task<CosmosDbUserService> InitializeCosmosClientInstanceUserAsync(IConfigurationSection configurationSection)
+        {
+            Log.Information("Connecting to Database and container 1...");
+            string databaseName = configurationSection.GetSection("DatabaseName").Value;
+            string containerName = configurationSection.GetSection("UserContainerName").Value;
+            string account = configurationSection.GetSection("Account").Value;
+            string key = configurationSection.GetSection("Key").Value;
+            Microsoft.Azure.Cosmos.CosmosClient client = new(account, key);
+            CosmosDbUserService cosmosDbService = new(client, databaseName, containerName);
+            Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
+            await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
 
-        //    return cosmosDbService;
-        //}
+            return cosmosDbService;
+        }
 
-        // Init container
-        //private static async Task<InitDataService> InitializeCosmosClientInstanceAppDataAsync(IConfigurationSection configurationSection)
+        // Post container
+        //private static async Task<CosmosDbPostService> InitializeCosmosClientInstanceAppDataAsync(IConfigurationSection configurationSection)
         //{
         //    Log.Information("Connecting to Database and container 2...");
         //    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-        //    string containerName = configurationSection.GetSection("InitContainerName").Value;
+        //    string containerName = configurationSection.GetSection("PostContainerName").Value;
         //    string account = configurationSection.GetSection("Account").Value;
         //    string key = configurationSection.GetSection("Key").Value;
         //    Microsoft.Azure.Cosmos.CosmosClient client = new(account, key);
-        //    InitDataService initDataService = new(client, databaseName, containerName);
+        //    CosmosDbPostService cosmosDbPostService = new(client, databaseName, containerName);
         //    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
         //    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
 
-        //    return initDataService;
+        //    return cosmosDbPostService;
         //}
 
         // Azure Blob storage setup

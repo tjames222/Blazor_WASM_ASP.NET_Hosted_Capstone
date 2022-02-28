@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="bootstrap" Version="5.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.2" />
@@ -23,6 +24,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\devSplain.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\Images\devSplainLogoBlack.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
