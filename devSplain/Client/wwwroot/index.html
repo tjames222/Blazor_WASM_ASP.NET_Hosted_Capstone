@@ -10,6 +10,13 @@
     <link href="css/app.css" rel="stylesheet" />
     <link href="devSplain.Client.styles.css" rel="stylesheet" />
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
+    
+    <!-- Carousel -->
+    <script type="text/javascript">
+        function startCarousels() {
+            $('.carousel').carousel({ interval: 4000 });
+        }
+    </script>
 </head>
 
 <body>
@@ -23,6 +30,11 @@
     <script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+
+    <!-- Carousel -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 
 </html>
