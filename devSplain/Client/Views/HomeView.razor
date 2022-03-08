@@ -1,5 +1,8 @@
 ﻿@page "/"
+@using devSplain.Shared.Data
+@using devSplain.Shared.Models
 @inject IJSRuntime JSRuntime
+@inject PostDataStoreSingleton _posts
 
 <div class="bd-example">
     <div id="homeCarousel" class="carousel slide" data-ride="carousel">
@@ -31,14 +34,14 @@
                 </div>
             </div>
         </div>
-        <a class="carousel-control-prev" href="#homeCarouselCaptions" role="button" data-slide="prev">
+@*        <a class="carousel-control-prev" href="#homeCarouselCaptions" role="button" data-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="sr-only">Previous</span>
         </a>
         <a class="carousel-control-next" href="#homeCarouselCaptions" role="button" data-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="sr-only">Next</span>
-        </a>
+        </a>*@
     </div>
 </div>
 <br />
@@ -74,6 +77,32 @@
              <div class="card w-75 h-100" style="background-color: #ffa114">
                  <div class="card-body">
                      <h3 class="h3 text-white text-center">Recent Articles</h3>
+                         <RadzenDataGrid Count="7" Data="@_posts.PostsList" Style="background-color: transparent"  AllowSorting="false" AllowFiltering="false" AllowPaging="false" PageSize="7"
+                                    TItem="PostModel" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selectedPost>
+                            <Columns>
+                                <RadzenDataGridColumn TItem="PostModel" Property="Title" Filterable="false" Frozen="true" Width="80px" TextAlign="TextAlign.Left" />
+                                @*<RadzenDataGridColumn TItem="PostModel" Title="Image" Sortable="false" Filterable="false" Width="80px">
+                                    <Template Context="data">
+                                        @if (string.IsNullOrEmpty(data.BlobURL))
+                                        {
+                                            <RadzenImage src="Images/default-avatar.png" alt="Image" style="width: 40px; height: 40px; border-radius: 8px;" />
+                                        }
+                                        else
+                                        {
+                                            try
+                                            {
+                                                <RadzenImage Path="" style="width: 40px; height: 40px; border-radius: 8px;" />
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Log.Error("Error: {0}", ex);
+                                            }
+                                        }
+                                    </Template>
+                                </RadzenDataGridColumn>*@
+                                <RadzenDataGridColumn TItem="PostModel" Property="CreatedOn" Width="50px"/>
+                            </Columns>
+                        </RadzenDataGrid>
                  </div>
             </div>
         </div>
@@ -87,4 +116,69 @@
     {
         await JSRuntime.InvokeVoidAsync("startCarousels");
     }
+
+    IList<PostModel> selectedPost;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _posts.PostsList.Clear();
+
+        PostModel post1 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post1);
+
+        PostModel post2 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post2);
+
+        PostModel post3 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post3);
+
+        PostModel post4 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post4);
+
+        PostModel post5 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post5);
+
+        PostModel post6 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post6);
+
+        PostModel post7 = new PostModel()
+        {
+            Title = "Great Post",
+            CreatedOn = DateTime.Now,
+            Author = "Tim James"
+        };
+        _posts.PostsList.Add(post7);
+    }
+
+
 }
