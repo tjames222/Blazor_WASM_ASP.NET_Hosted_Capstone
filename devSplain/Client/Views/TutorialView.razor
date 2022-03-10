@@ -1,7 +1,68 @@
-﻿@page "/tutorial"
+﻿@page "/tutorial/{postId}"
+@using devSplain.Shared.Data
+@using devSplain.Shared.Models
 
-<h3 class="text-white">TutorialView</h3>
+@inject PostDataStoreSingleton _posts
+
+<div class="container-fluid align-content-center">
+    <!-- This will be the image of the current post -->
+    <img class="img-fluid rounded " src="Images/2.png" />
+</div>
+<br/>
+<br/>
+<div class="container-fluid align-content-center">
+    <div class="card bg-dark">
+        <div class="card-header">
+            <h1 class="h1 text-white text-center">@post.Title</h1>
+            <div class="lead">
+                <h2 class="h2 text-white text-center">Author: @post.Author</h2>
+                <h3 class="h3 text-white text-center">Posted: @post.CreatedOn</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-white text-wrap">@post.Text</p>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<div class="container-fluid align-content-center">
+    <div class="card bg-dark">
+        <div class="card-header">
+            <h1 class="h1 text-white text-center">Comments</h1>
+        </div>
+        <div class="card-body">
+
+        </div>
+    </div>
+</div>
+
 
 @code {
+    PostModel? post = new PostModel();
 
+    [Parameter]
+    public string postId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        try
+            {
+                var id = postId;
+                try
+                {
+                    post = _posts.PostsList.FirstOrDefault(o => o.PostId == id);
+                    Log.Information($"Page populated with Post: Title: {post.Title} Author: {post.Author}");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("ERROR: {0}", ex);
+                }
+            }
+            catch (AccessTokenNotAvailableException ex)
+            {
+                Log.Information("User not authorized. Redirecting.");
+                ex.Redirect();
+            }
+    }
 }
