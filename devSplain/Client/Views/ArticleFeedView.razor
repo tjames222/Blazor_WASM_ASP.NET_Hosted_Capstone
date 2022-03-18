@@ -4,6 +4,7 @@
 @using devSplain.Shared.Models
 @inject IJSRuntime JSRuntime
 @inject PostDataStoreSingleton _posts
+@inject HttpClient _http
 
 <div class="bd-example">
     <div id="homeCarousel" class="carousel slide" data-ride="carousel">
@@ -38,54 +39,47 @@
 
 <div class="container-fluid">
     
-    @while (i < articles.Count())
+    @if (articles.Count() != 0)
     {
-        <br />
-        <div class="row">
-        @try 
+        int i = 0;
+        @while (i < articles.Count())
         {
-            @for (int j = 0; j < 3; j++)
+            <br />
+            <div class="row">
+            @try 
             {
-                if (i < articles.Count())
+                @for (int j = 0; j < 3; j++)
                 {
-                    <div class="col-lg">
-                        <div class="card bg-dark w-100">
-                            <a class="card-block stretched-link text-decoration-none" href="/article/@articles[i].PostId">
-                                <div class="card-body">
-                                    <!-- Grab posts labeled article and order by date -->
-                                    <h3 class="h3 text-white text-center">@articles[i].Title</h3>
-                                    <p>@articles[i].Text.Substring(0, 200)</p>
-                                </div>
-                            </a>
+                    if (i < articles.Count())
+                    {
+                        <div class="col-lg">
+                            <div class="card bg-dark w-100">
+                                <a class="card-block stretched-link text-decoration-none" href="/article/@articles[i].PostId">
+                                    <div class="card-body">
+                                        <!-- Grab posts labeled article and order by date -->
+                                        <h3 class="h3 text-white text-center">@articles[i].Title</h3>
+                                        @if (articles[i].Text.Count() > 200)
+                                        {
+                                            <p>@articles[i].Text.Substring(0, 200)</p>
+                                        }
+                                        else
+                                        {
+                                            <p>@articles[i].Text</p>
+                                        }
+                                    </div>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    i++;
+                        i++;
+                    }
                 }
-                @*Figure out what to do with odd number of posts*@
-                @*if (i == _posts.PostsList.Count())
-                {
-                     <div class="col-lg">
-                        <div class="card bg-dark w-100">
-                            <a class="card-block stretched-link text-decoration-none" href="/tutorial">
-                                <div class="card-body">
-                                    <!-- Grab posts labeled article and order by date -->
-                                    <h3 class="h3 text-white text-center">@_posts.PostsList[i].Title</h3>
-                                    <p>@_posts.PostsList[i].Text.Substring(0, 100)</p>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg">
-                    </div>
-                    i++;   
-                }*@
+            } 
+            catch (Exception ex)
+            {
+                Log.Information("No more items in post list: {0}", ex);
             }
-        } 
-        catch (Exception ex)
-        {
-            Log.Information("No more items in post list: {0}", ex);
+            </div>
         }
-        </div>
     }
 </div>
 <br />
@@ -97,8 +91,6 @@
         await JSRuntime.InvokeVoidAsync("startCarousels");
     }
 
-    int i = 0;
-
     IList<PostModel> selectedPost;
 
     IList<PostModel> articles;
@@ -107,92 +99,12 @@
     {
         Log.Information("Initializing Article Feed View.");
 
+        // Add a datetime singleton that checks the database for new data every 5-10 minutes
+        // after the first launch of this page
+        _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+
         // Grab only Posts labeled article in the post singleton
-        _posts.PostsList.Clear();
-
-        PostModel post1 = new PostModel()
-        {
-            Title = "Great Post 1",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus.",
-            Type = "tutorial",
-            PostId = "1"
-        };
-        _posts.PostsList.Add(post1);
-
-        PostModel post2 = new PostModel()
-        {
-            Title = "Great Post 2",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus.",
-            Type = "article",
-            PostId = "2"
-        };
-        _posts.PostsList.Add(post2);
-
-        PostModel post3 = new PostModel()
-        {
-            Title = "Great Post 3",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus.",
-            Type = "article",
-            PostId = "3"
-        };
-        _posts.PostsList.Add(post3);
-
-        PostModel post4 = new PostModel()
-        {
-            Title = "Great Post 4",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus.",
-            Type = "article",
-            PostId = "4"
-        };
-        _posts.PostsList.Add(post4);
-
-        PostModel post5 = new PostModel()
-        {
-            Title = "Great Post 5",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus.",
-            Type = "article",
-            PostId = "5"
-        };
-        _posts.PostsList.Add(post5);
-
-        PostModel post6 = new PostModel()
-        {
-            Title = "Great Post 6",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus.",
-            Type = "article",
-            PostId = "6"
-        };
-        _posts.PostsList.Add(post6);
-
-        PostModel post7 = new PostModel()
-        {
-            Title = "Great Post 7",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James",
-            Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a fermentum orci, ac tempor eros. Cras fringilla ipsum quis odio mollis, vitae lacinia velit commodo. Integer consectetur turpis et venenatis facilisis. Suspendisse id consectetur mauris. Vivamus accumsan porttitor arcu, a interdum quam ullamcorper et. Vivamus vitae lectus lobortis, pretium nisl non, faucibus turpis. Integer sodales purus sed est cursus bibendum. Proin diam est, volutpat et nibh sed, varius eleifend ante. Quisque turpis est, facilisis nec viverra at, faucibus sed ligula. Curabitur viverra dui id erat convallis facilisis. In condimentum est eget ligula varius scelerisque. Mauris lobortis ipsum at mauris laoreet, ut ultricies nisi tempus. Nullam ut leo enim. Quisque nec eleifend tellus, ac sollicitudin erat." +
-                "Aenean rutrum dolor diam. Ut fringilla ipsum nec enim molestie, ut rhoncus tellus dictum. Integer quis vehicula velit, vulputate imperdiet velit. Sed sodales vestibulum orci. Fusce eu est ultrices, vulputate nibh ut, imperdiet velit. Sed gravida sit amet magna nec aliquet. Ut a augue ante. Sed a semper lectus. Donec blandit accumsan mi sed feugiat. Proin sit amet tempus est, non consequat magna. Aenean venenatis odio ut imperdiet mattis. Etiam dapibus fringilla leo a porta. In magna nulla, viverra id nulla ac, faucibus lacinia purus. Nulla vulputate purus lectus, non dignissim libero semper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam facilisis dolor at sem molestie, in fermentum libero rhoncus."
-        };
-        _posts.PostsList.Add(post7);
-
-        articles = _posts.PostsList.FindAll(c => c.Type == "article");
+        articles =  _posts.PostsList.FindAll(c => c.Type == "article");
     }
 
 }

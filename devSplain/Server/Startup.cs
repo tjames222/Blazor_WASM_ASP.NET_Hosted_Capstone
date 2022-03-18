@@ -28,7 +28,7 @@ namespace devSplain.Server
                 services.AddScoped<TooltipService>();
                 services.AddScoped<ContextMenuService>();
                 services.AddSingleton<ICosmosDbService>(InitializeCosmosClientInstanceUserAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
-                //services.AddSingleton<CosmosDbPostService>(InitializeCosmosClientInstanceAppDataAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
+                services.AddSingleton<ICosmosDbService>(InitializeCosmosClientInstancePostAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
                 //services.AddSingleton<IBlobService>(InitializeAzureBlobClientInstance(Configuration.GetSection("BlobStorage")));
 
                 services.AddRazorPages();
@@ -112,20 +112,20 @@ namespace devSplain.Server
         }
 
         // Post container
-        //private static async Task<CosmosDbPostService> InitializeCosmosClientInstanceAppDataAsync(IConfigurationSection configurationSection)
-        //{
-        //    Log.Information("Connecting to Database and container 2...");
-        //    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-        //    string containerName = configurationSection.GetSection("PostContainerName").Value;
-        //    string account = configurationSection.GetSection("Account").Value;
-        //    string key = configurationSection.GetSection("Key").Value;
-        //    Microsoft.Azure.Cosmos.CosmosClient client = new(account, key);
-        //    CosmosDbPostService cosmosDbPostService = new(client, databaseName, containerName);
-        //    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-        //    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
+        private static async Task<CosmosDbPostService> InitializeCosmosClientInstancePostAsync(IConfigurationSection configurationSection)
+        {
+            Log.Information("Connecting to Database and container 2...");
+            string databaseName = configurationSection.GetSection("DatabaseName").Value;
+            string containerName = configurationSection.GetSection("PostContainerName").Value;
+            string account = configurationSection.GetSection("Account").Value;
+            string key = configurationSection.GetSection("Key").Value;
+            Microsoft.Azure.Cosmos.CosmosClient client = new(account, key);
+            CosmosDbPostService cosmosDbPostService = new(client, databaseName, containerName);
+            Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
+            await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
 
-        //    return cosmosDbPostService;
-        //}
+            return cosmosDbPostService;
+        }
 
         // Azure Blob storage setup
         //private static BlobService InitializeAzureBlobClientInstance(IConfigurationSection configurationSection)

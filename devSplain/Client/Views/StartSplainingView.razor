@@ -3,7 +3,7 @@
 @using devSplain.Shared.Models
 
 @inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
-@inject HttpClient Http
+@inject HttpClient _http
 @inject PostDataStoreSingleton _posts
 
 <!-- Future implementation -->
@@ -20,7 +20,9 @@
             <div class="container-fluid align-content-center">
                 <div class="card bg-dark">
                     <div class="card-header" >
+                        <br />
                         <div class="form-group">
+                            <label for="title" class="col-form-label, text-white">Title</label>
                             <input type="text" placeholder="Add Title" @bind="post.Title" class="form-control" id="title" required />
                         </div>
                     </div>
@@ -31,15 +33,22 @@
                         </div>
                         <div class="form-group">
                             <label for="text" class="col-form-label, text-white">Main Body</label>
-                            <input type="text" placeholder="Start splaining..." @bind="post.Text" class="form-control form-control-lg" id="text" required />
+                            <input type="text" placeholder="Start splaining..." @bind="post.Text" class="form-control form-control-lg" style="margin:200, 0" id="text" required />
                         </div>
                         <div class="dropdown">
                           <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Post Type
+                            @if (string.IsNullOrEmpty(post.Type))
+                            {
+                                <text>Post Type</text>
+                            }
+                            else
+                            {
+                                @post.Type
+                            }
                           </button>
                           <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton">
-                            <button class="dropdown-item" @onclick="Article">Article</button>
-                            <button class="dropdown-item" @onclick="Tutorial">Tutorial</button>
+                            <input class="dropdown-item text-white" @onclick="Article" value="Article" type="button"/>
+                            <input class="dropdown-item text-white" @onclick="Tutorial" value="Tutorial" type="button"/>
                           </div>
                         </div><br /><br /><br /><br />
                         <div class="card-footer">
@@ -70,29 +79,44 @@
 
         Log.Information($"Post: {post.Title} Written by: {post.Author} -> added to database at {post.CreatedOn}");
 
-        // Temporary upload to singleton, later upload to cosmos db
-        //await Http.PostAsJsonAsync<PostModel>($"/api/User/Create", post);
-        _posts.PostsList.Add(post);
+        try
+        {
+            // Upload to cosmos db
+            var result = await _http.PostAsJsonAsync<PostModel>($"/api/Post/Create", post);
 
-        if (post.Type.ToLower() == "article")
-        {
-            navigationManager.NavigateTo($"/article/{post.PostId}");
+            if (result.IsSuccessStatusCode)
+            {
+                // Update the singleton, because we just added new info to the db
+                _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+            }
+
+            if (post.Type.ToLower() == "article")
+            {
+                navigationManager.NavigateTo($"/article/{post.PostId}");
+            }
+            else
+            {
+                navigationManager.NavigateTo($"/tutorial/{post.PostId}");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            navigationManager.NavigateTo($"/tutorial/{post.PostId}");
+            Log.Error("Error: {0}", ex);
         }
+
     }
 
     void Article()
     {
-        post.Type = "article";
+        post.Type = "Article";
     }
 
     void Tutorial()
     {
-        post.Type = "tutorial";
+        post.Type = "Tutorial";
     }
+
+    // Need to add a tags method here
 
     // TODO: Future implementation of Post image upload stubbed out
     //private async Task<System.IO.Stream> UploadPostImage(byte[] paramFileBytes, string postId)
