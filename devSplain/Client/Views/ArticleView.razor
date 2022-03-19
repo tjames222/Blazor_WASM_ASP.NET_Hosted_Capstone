@@ -1,13 +1,13 @@
-﻿@page "/tutorial/{postId}"
+﻿@page "/article/{postId}"
+
 @using devSplain.Shared.Data
 @using devSplain.Shared.Models
 
 @inject PostDataStoreSingleton _posts
-@inject HttpClient _http
 
 <div class="container-fluid align-content-center">
     <!-- This will be the image of the current post -->
-    <img class="img-fluid rounded " src="Images/2.png" />
+    <img class="img-fluid rounded " src="Images/3.png" />
 </div>
 <br/>
 <br/>
@@ -44,13 +44,13 @@
     PostModel? post = new PostModel();
 
     [Parameter]
-    public string? postId { get; set; }
+    public string postId { get; set; }
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         try
             {
-                string? id = postId;
+                var id = postId;
                 try
                 {
                     post = _posts.PostsList.FirstOrDefault(o => o.PostId == id);

@@ -1,5 +1,7 @@
-﻿<div class="pl-4 py-1 navbar navbar-dark">
-    <img class="navbar-brand" src="Images/devSplainLogoWhite.png" alt="Image" height="200">
+﻿@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+
+<div class="pl-4 py-1 navbar navbar-dark">
+    <img class="navbar-brand" src="Images/devSplainLogoWhite.png" alt="Image" height="200" onclick="@Home">
     <div class="container-fluid">
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
@@ -25,7 +27,7 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="start-splaining">
+            <NavLink class="nav-link" href="startsplaining">
                 <span class="oi oi-pencil" aria-hidden="true"></span> Start Splaining
             </NavLink>
         </div>
@@ -45,5 +47,10 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    public void Home()
+    {
+        navigationManager.NavigateTo("/");
     }
 }

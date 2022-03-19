@@ -6,12 +6,22 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, @context.User.Identity.Name!</a>
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            @context.User.Identity.Name
+          </button>
+          <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton">
+            <button class="dropdown-item" @onclick="Dashboard">Dashboard</button>
+            <button class="dropdown-item" @onclick="BeginSignOut">Logout</button>
+          </div>
+        </div>
     </Authorized>
     <NotAuthorized>
-        @*<a class="btn-link" href="authentication/register">Register</a>*@
-        <a class="btn-link" href="authentication/login">Log in</a>
+        <div class="dropdown">
+          <button class="btn btn-secondary" @onclick="Login" type="button" aria-haspopup="true" aria-expanded="false">
+            Login
+          </button>
+        </div>
     </NotAuthorized>
 </AuthorizeView>
 
@@ -21,5 +31,17 @@
         Log.Information("Signing out user...");
         await SignOutManager.SetSignOutState();
         Navigation.NavigateTo("authentication/logout");
+    }
+
+    private void Login(MouseEventArgs args)
+    {
+        Log.Information("User is attempting to Login");
+        Navigation.NavigateTo("authentication/login");
+    }
+
+    private void Dashboard(MouseEventArgs args)
+    {
+        Log.Information("Navigating to User Dashboard");
+        Navigation.NavigateTo("user-dashboard");
     }
 }

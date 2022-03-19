@@ -1,5 +1,143 @@
-﻿<h3>StartSplainingView</h3>
+﻿@page "/startsplaining"
+@using devSplain.Shared.Data
+@using devSplain.Shared.Models
+
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+@inject HttpClient _http
+@inject PostDataStoreSingleton _posts
+
+<!-- Future implementation -->
+@*<AuthorizeView Roles="User, Admin">
+    <Authorized>*@
+        <form @onsubmit="@Submit">
+            <div class="container-fluid align-content-center">
+                <!-- This will be the image of the current post -->
+                <input type="image" class="img-fluid rounded " src="Images/upload.png" />
+            </div>
+            <br/>
+            <br/>
+
+            <div class="container-fluid align-content-center">
+                <div class="card bg-dark">
+                    <div class="card-header" >
+                        <br />
+                        <div class="form-group">
+                            <label for="title" class="col-form-label, text-white">Title</label>
+                            <input type="text" placeholder="Add Title" @bind="post.Title" class="form-control" id="title" required />
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="author" class="col-form-label, text-white">Author</label>
+                            <input type="text" @bind="post.Author" class="form-control" id="author" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="text" class="col-form-label, text-white">Main Body</label>
+                            <input type="text" placeholder="Start splaining..." @bind="post.Text" class="form-control form-control-lg" style="margin:200, 0" id="text" required />
+                        </div>
+                        <div class="dropdown">
+                          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @if (string.IsNullOrEmpty(post.Type))
+                            {
+                                <text>Post Type</text>
+                            }
+                            else
+                            {
+                                @post.Type
+                            }
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton">
+                            <input class="dropdown-item text-white" @onclick="Article" value="Article" type="button"/>
+                            <input class="dropdown-item text-white" @onclick="Tutorial" value="Tutorial" type="button"/>
+                          </div>
+                        </div><br /><br /><br /><br />
+                        <div class="card-footer">
+                            <div class="form-group justify-content-end">
+                                <input class="btn btn-outline-success" type="submit" value="Submit">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+<!-- Future Implementation-->
+@*    </Authorized>
+    <NotAuthorized>
+        <p class="text-white">Restricted User area. You are not authorized to view this page. Please reach out to support if you need access.</p>
+    </NotAuthorized>
+</AuthorizeView>*@
 
 @code {
 
+    PostModel post = new PostModel();
+
+    async void Submit()
+    {
+        post.CreatedOn = DateTime.Now;
+
+        Log.Information($"Post: {post.Title} Written by: {post.Author} -> added to database at {post.CreatedOn}");
+
+        try
+        {
+            // Upload to cosmos db
+            var result = await _http.PostAsJsonAsync<PostModel>($"/api/Post/Create", post);
+
+            if (result.IsSuccessStatusCode)
+            {
+                // Update the singleton, because we just added new info to the db
+                _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+            }
+
+            // We need to find the article in the database and then grab the postid before we pass it to the next page
+            // post = await _http.GetFromJsonAsync<PostModel>($"api/Post/Get/{}")
+            // post.PostId = result.RequestMessage.Content.ReadFromJsonAsync<PostModel>().Result.PostId;
+
+            if (post.Type.ToLower() == "article")
+            {
+                navigationManager.NavigateTo($"/articles");
+            }
+            else
+            {
+                navigationManager.NavigateTo($"/tutorials");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Error: {0}", ex);
+        }
+
+    }
+
+    void Article()
+    {
+        post.Type = "Article";
+    }
+
+    void Tutorial()
+    {
+        post.Type = "Tutorial";
+    }
+
+    // Need to add a tags method here
+
+    // TODO: Future implementation of Post image upload stubbed out
+    //private async Task<System.IO.Stream> UploadPostImage(byte[] paramFileBytes, string postId)
+    //{
+    //    HttpContent bytesContent = new ByteArrayContent(paramFileBytes);
+
+    //    using (var formData = new MultipartFormDataContent())
+    //    {
+    //        formData.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
+    //        formData.Add(bytesContent, "file", "postImage.png"); // The names here don't matter. They are just Generic.
+
+    //        var response = await Http.PostAsync($"/api/Blob/UploadPostImage/{postId}", formData);
+
+    //        if (!response.IsSuccessStatusCode)
+    //        {
+    //            return null;
+    //        }
+    //        return await response.Content.ReadAsStreamAsync();
+    //    }
+    //}
 }

@@ -1,4 +1,5 @@
 using devSplain.Client;
+using devSplain.Shared.Data;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
@@ -52,6 +53,9 @@ public class Program
 
             builder.Services.AddApiAuthorization();
             builder.Services.AddTransient<RoleClaimsPrincipalFactory>();
+            builder.Services.AddSingleton<UserDataStoreSingleton>();
+            builder.Services.AddSingleton<PostDataStoreSingleton>();
+            builder.Services.AddSingleton<BlobDataStoreSingleton>();
             builder.Services.AddScoped<DialogService>();
             builder.Services.AddScoped<NotificationService>();
             builder.Services.AddScoped<TooltipService>();
