@@ -3,6 +3,7 @@
 @using devSplain.Shared.Models
 
 @inject PostDataStoreSingleton _posts
+@inject HttpClient _http
 
 <div class="container-fluid align-content-center">
     <!-- This will be the image of the current post -->
@@ -43,13 +44,13 @@
     PostModel? post = new PostModel();
 
     [Parameter]
-    public string postId { get; set; }
+    public string? postId { get; set; }
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         try
             {
-                var id = postId;
+                string? id = postId;
                 try
                 {
                     post = _posts.PostsList.FirstOrDefault(o => o.PostId == id);

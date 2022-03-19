@@ -91,20 +91,27 @@
         await JSRuntime.InvokeVoidAsync("startCarousels");
     }
 
-    IList<PostModel> selectedPost;
+    // IList<PostModel> selectedPost;
 
-    IList<PostModel> articles;
+    IList<PostModel> articles = new List<PostModel>();
 
     protected override async Task OnInitializedAsync()
     {
         Log.Information("Initializing Article Feed View.");
 
-        // Add a datetime singleton that checks the database for new data every 5-10 minutes
-        // after the first launch of this page
-        _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+        try
+        {
+            // Add a datetime singleton that checks the database for new data every 5-10 minutes
+            // after the first launch of this page
+            _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
 
-        // Grab only Posts labeled article in the post singleton
-        articles =  _posts.PostsList.FindAll(c => c.Type == "article");
+            // Grab only Posts labeled article in the post singleton
+            articles =  _posts.PostsList.FindAll(c => c.Type.ToLower() == "article");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("ERROR: {0}", ex);
+        }
     }
 
 }

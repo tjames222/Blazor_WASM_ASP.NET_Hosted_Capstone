@@ -3,6 +3,7 @@
 @using devSplain.Shared.Models
 @inject IJSRuntime JSRuntime
 @inject PostDataStoreSingleton _posts
+@inject HttpClient _http
 
 <div class="bd-example">
     <div id="homeCarousel" class="carousel slide" data-ride="carousel">
@@ -109,63 +110,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _posts.PostsList.Clear();
-
-        PostModel post1 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post1);
-
-        PostModel post2 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post2);
-
-        PostModel post3 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post3);
-
-        PostModel post4 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post4);
-
-        PostModel post5 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post5);
-
-        PostModel post6 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post6);
-
-        PostModel post7 = new PostModel()
-        {
-            Title = "Great Post",
-            CreatedOn = DateTime.Now,
-            Author = "Tim James"
-        };
-        _posts.PostsList.Add(post7);
+        _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
     }
 
 
