@@ -110,7 +110,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+        try
+        {
+            _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("ERROR: {0}", ex);
+        }
+
     }
 
 
