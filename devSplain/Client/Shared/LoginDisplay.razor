@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using devSplain.Shared.Models
 
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
@@ -26,6 +27,8 @@
 </AuthorizeView>
 
 @code{
+    UserModel userModel = new UserModel();
+
     private async Task BeginSignOut(MouseEventArgs args)
     {
         Log.Information("Signing out user...");
