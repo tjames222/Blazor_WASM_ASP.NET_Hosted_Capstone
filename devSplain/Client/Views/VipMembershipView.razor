@@ -1,7 +1,26 @@
 ﻿@page "/vip-member"
 
-<h3>VipMembershipView</h3>
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <p class="text-white">Coming Soon!</p>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container-fluid">
+            <h1 class="h1 text-white text-center">Welcome to the devSplain Community</h1>
+            <p class="text-white text-center">You must be logged in to view content.</p>
+            <div class="col text-center">
+                <button class="btn btn-lg btn-danger" @onclick="Login">Login or Create Account</button>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-
+    private void Login(MouseEventArgs args)
+    {
+        Log.Information("User is attempting to Login");
+        Navigation.NavigateTo("authentication/login");
+    }
 }

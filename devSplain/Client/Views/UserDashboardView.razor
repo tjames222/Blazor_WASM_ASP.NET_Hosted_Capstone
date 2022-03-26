@@ -1,9 +1,15 @@
 ﻿@page "/user-dashboard"
 
+@using System.Security.Claims
 @using devSplain.Shared.Data
 @using devSplain.Shared.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using static Microsoft.AspNetCore.Components.Authorization.AuthenticationState
 
+@inject AuthenticationStateProvider authenticationState
 @inject PostDataStoreSingleton _posts
+@inject HttpClient _http
 
 <AuthorizeView>
     <Authorized>
@@ -15,6 +21,21 @@
                              <div class="card-body">
                                  <h3 class="h3 text-white text-center">Edit User Info</h3>
                              </div>
+                             <div class="card-footer">
+                                 <p class="text-white">@context.User.Identity.Name</p>
+                                 @if (_claims.Count() > 0)
+                                 {
+                                    <ul>
+                                        @foreach (var claim in _claims)
+                                        {
+                                            if (claim.Type == "preferred_username" || claim.Type == "roles" || claim.Type == "zoneinfo")
+                                            {
+                                                <li>@claim.Type: @claim.Value</li>
+                                            }
+                                        }
+                                    </ul>
+                                 }
+                             </div>
                          </a>
                     </div>
                 </div>
@@ -24,6 +45,9 @@
                              <div class="card-body">
                                  <h3 class="h3 text-white text-center">Edit Author Info</h3>
                              </div>
+                             <div class="card-footer">
+                                 This is where about the author info will go.
+                             </div>
                          </a>
                     </div>
                 </div>
@@ -32,36 +56,52 @@
         <br />
         <br />
         <div class="card w-100 h-100" style="background-color: #ffa114">
-                         <div class="card-body">
-                             <h3 class="h3 text-white text-center">My Posts</h3>
-                                 <RadzenDataGrid Count="7" Data="@_posts.PostsList" Style="background-color: transparent"  AllowSorting="false" AllowFiltering="false" AllowPaging="false" PageSize="7"
-                                            TItem="PostModel" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selectedPost>
-                                    <Columns>
-                                        <RadzenDataGridColumn TItem="PostModel" Property="Title" Filterable="false" Frozen="true" Width="80px" TextAlign="TextAlign.Left" />
-                                        @*<RadzenDataGridColumn TItem="PostModel" Title="Image" Sortable="false" Filterable="false" Width="80px">
-                                            <Template Context="data">
-                                                @if (string.IsNullOrEmpty(data.BlobURL))
-                                                {
-                                                    <RadzenImage src="Images/default-avatar.png" alt="Image" style="width: 40px; height: 40px; border-radius: 8px;" />
-                                                }
-                                                else
-                                                {
-                                                    try
-                                                    {
-                                                        <RadzenImage Path="" style="width: 40px; height: 40px; border-radius: 8px;" />
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        Log.Error("Error: {0}", ex);
-                                                    }
-                                                }
-                                            </Template>
-                                        </RadzenDataGridColumn>*@
-                                        <RadzenDataGridColumn TItem="PostModel" Property="CreatedOn" Width="50px"/>
-                                    </Columns>
-                                </RadzenDataGrid>
-                         </div>
-                    </div>
+            <div class="card-header">
+                <h3 class="h3 text-white text-center">My Posts</h3>
+            </div>
+            <div class="card-body">
+                @if (@userPosts.Count > 0)
+                {
+                    try
+                    {
+                        <RadzenDataGrid Count="12" Data="@userPosts" Style="background-color: darkgray"  AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="12"
+                                TItem="PostModel" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selectedPost>
+                            <Columns>
+                                <RadzenDataGridColumn TItem="PostModel" Property="Title" Filterable="false" Frozen="true" Width="80px" TextAlign="TextAlign.Left" />
+                                @*<RadzenDataGridColumn TItem="PostModel" Title="Image" Sortable="false" Filterable="false" Width="80px">
+                                    <Template Context="data">
+                                    @if (string.IsNullOrEmpty(data.BlobURL))
+                                    {
+                                    <RadzenImage src="Images/default-avatar.png" alt="Image" style="width: 40px; height: 40px; border-radius: 8px;" />
+                                    }
+                                    else
+                                    {
+                                    try
+                                    {
+                                    <RadzenImage Path="" style="width: 40px; height: 40px; border-radius: 8px;" />
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                    Log.Error("Error: {0}", ex);
+                                    }
+                                    }
+                                    </Template>
+                                    </RadzenDataGridColumn>*@
+                                <RadzenDataGridColumn TItem="PostModel" Property="CreatedOn" Width="50px"/>
+                            </Columns>
+                        </RadzenDataGrid>
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("ERROR: {0}", ex);
+                    }
+                }
+                else
+                {
+                    <p class="text-white text-sm-center">No Data to Display</p>
+                }
+            </div>
+        </div>
     </Authorized>
     <NotAuthorized>
         <p class="text-white">Restricted User area. You are not authorized to view this page. Please reach out to support if you need access.</p>
@@ -69,10 +109,15 @@
 </AuthorizeView>
 
 @code {
-    IList<PostModel> selectedPost;
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+    IList<PostModel> selectedPost = new List<PostModel>();
+    IList<PostModel> userPosts = new List<PostModel>();
 
     protected override async Task OnInitializedAsync()
     {
-        // _posts.PostsList = await _http.GetFromJsonAsync<List<PostModel>>($"api/Post/GetAll");
+        var authState = await authenticationState.GetAuthenticationStateAsync();
+        var user = authState.User;
+        _claims = user.Claims;
+        userPosts = _posts.PostsList.FindAll(x => x.Author == user.Identity.Name);
     }
 }

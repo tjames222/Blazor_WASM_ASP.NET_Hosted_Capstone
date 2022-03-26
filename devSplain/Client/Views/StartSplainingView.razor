@@ -1,14 +1,18 @@
 ﻿@page "/startsplaining"
+
 @using devSplain.Shared.Data
 @using devSplain.Shared.Models
 
 @inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+@inject AuthenticationStateProvider authenticationState
 @inject HttpClient _http
 @inject PostDataStoreSingleton _posts
+@inject NavigationManager Navigation
 
 <!-- Future implementation -->
-@*<AuthorizeView Roles="User, Admin">
-    <Authorized>*@
+@*<AuthorizeView Roles="User, Admin">*@
+<AuthorizeView>
+    <Authorized>
         <form @onsubmit="@Submit">
             <div class="container-fluid align-content-center">
                 <!-- This will be the image of the current post -->
@@ -27,16 +31,31 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="form-group">
+                        @*<div class="form-group">
                             <label for="author" class="col-form-label, text-white">Author</label>
-                            <input type="text" @bind="post.Author" class="form-control" id="author" required />
-                        </div>
+                            <input type="text" @bind="post.Author"  class="form-control" id="author" required />
+                        </div>*@
                         <div class="form-group">
                             <label for="text" class="col-form-label, text-white">Main Body</label>
-                            <input type="text" placeholder="Start splaining..." @bind="post.Text" class="form-control form-control-lg" style="margin:200, 0" id="text" required />
+                            @*<input type="text" placeholder="Start splaining..." @bind="post.Text" class="form-control form-control-lg" style="padding:200, 0" id="text" required />*@
+                            <div class="flex-column">
+                                @*Need to figure out a way to hard code the text to white*@
+                                <RadzenHtmlEditor @bind-Value=@post.Text style="height: 500px; margin-bottom: 1rem; background-color: darkgray;" UploadUrl="upload/image" >
+                                    <RadzenHtmlEditorUndo />
+                                    <RadzenHtmlEditorRedo />
+                                    <RadzenHtmlEditorSeparator />
+                                    <RadzenHtmlEditorBold />
+                                    <RadzenHtmlEditorItalic />
+                                    <RadzenHtmlEditorUnderline />
+                                    <RadzenHtmlEditorStrikeThrough />
+                                    <RadzenHtmlEditorSeparator />
+                                    <RadzenHtmlEditorRemoveFormat />
+                                    <RadzenHtmlEditorColor />
+                                </RadzenHtmlEditor>
+                            </div>
                         </div>
                         <div class="dropdown">
-                          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             @if (string.IsNullOrEmpty(post.Type))
                             {
                                 <text>Post Type</text>
@@ -45,11 +64,11 @@
                             {
                                 @post.Type
                             }
-                          </button>
-                          <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton">
-                            <input class="dropdown-item text-white" @onclick="Article" value="Article" type="button"/>
-                            <input class="dropdown-item text-white" @onclick="Tutorial" value="Tutorial" type="button"/>
-                          </div>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton">
+                                <input class="dropdown-item text-white" @onclick="Article" value="Article" type="button"/>
+                                <input class="dropdown-item text-white" @onclick="Tutorial" value="Tutorial" type="button"/>
+                            </div>
                         </div><br /><br /><br /><br />
                         <div class="card-footer">
                             <div class="form-group justify-content-end">
@@ -60,17 +79,29 @@
                 </div>
             </div>
         </form>
-
-<!-- Future Implementation-->
-@*    </Authorized>
+    </Authorized>
+    @*Future implementation should be an application page.*@
     <NotAuthorized>
-        <p class="text-white">Restricted User area. You are not authorized to view this page. Please reach out to support if you need access.</p>
+        <div class="container-fluid">
+            <h1 class="h1 text-white text-center">Welcome to the devSplain Community</h1>
+            <p class="text-white text-center">You must be logged in to view content.</p>
+            <div class="col text-center">
+                <button class="btn btn-lg btn-danger" @onclick="Login">Login or Create Account</button>
+            </div>
+        </div>
     </NotAuthorized>
-</AuthorizeView>*@
+</AuthorizeView>
 
 @code {
 
     PostModel post = new PostModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationState.GetAuthenticationStateAsync();
+        var user = authState.User;
+        post.Author = user.Identity.Name;
+    }
 
     async void Submit()
     {
@@ -106,7 +137,6 @@
         {
             Log.Error("Error: {0}", ex);
         }
-
     }
 
     void Article()
@@ -117,6 +147,12 @@
     void Tutorial()
     {
         post.Type = "Tutorial";
+    }
+
+    private void Login(MouseEventArgs args)
+    {
+        Log.Information("User is attempting to Login");
+        Navigation.NavigateTo("authentication/login");
     }
 
     // Need to add a tags method here

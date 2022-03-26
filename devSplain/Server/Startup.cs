@@ -1,5 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using devSplain.Server.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Okta.AspNetCore;
 using Radzen;
 using Serilog;
@@ -27,6 +29,7 @@ namespace devSplain.Server
                 services.AddScoped<NotificationService>();
                 services.AddScoped<TooltipService>();
                 services.AddScoped<ContextMenuService>();
+                services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
                 services.AddSingleton<ICosmosDbService>(InitializeCosmosClientInstanceUserAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
                 services.AddSingleton<ICosmosDbService>(InitializeCosmosClientInstancePostAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
                 //services.AddSingleton<IBlobService>(InitializeAzureBlobClientInstance(Configuration.GetSection("BlobStorage")));
@@ -45,6 +48,8 @@ namespace devSplain.Server
                 });
 
                 services.AddAuthorization();
+                services.AddAuthorizationCore();
+                services.AddApiAuthorization();
 
                 // TODO: Future implementation
                 // services.AddTransient<IClaimsTransformation, GroupsToRolesTransformerService>();

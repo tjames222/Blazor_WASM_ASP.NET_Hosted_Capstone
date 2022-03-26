@@ -4,41 +4,55 @@
 @using devSplain.Shared.Models
 
 @inject PostDataStoreSingleton _posts
+@inject NavigationManager Navigation
 
-<div class="container-fluid align-content-center">
-    <!-- This will be the image of the current post -->
-    <img class="img-fluid rounded " src="Images/3.png" />
-</div>
-<br/>
-<br/>
-<div class="container-fluid align-content-center">
-    <div class="card bg-dark">
-        <div class="card-header">
-            <h1 class="h1 text-white text-center">@post.Title</h1>
-            <div class="lead">
-                <h2 class="h2 text-white text-center">Author: @post.Author</h2>
-                <h3 class="h3 text-white text-center">Posted: @post.CreatedOn</h3>
+<AuthorizeView>
+    <Authorized>
+        <div class="container-fluid align-content-center">
+            <!-- This will be the image of the current post -->
+            <img class="img-fluid rounded " src="Images/3.png" />
+        </div>
+        <br/>
+        <br/>
+        <div class="container-fluid align-content-center">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h1 class="h1 text-white text-center">@post.Title</h1>
+                    <div class="lead">
+                        <h2 class="h2 text-white text-center">Author: @post.Author</h2>
+                        <h3 class="h3 text-white text-center">Posted: @post.CreatedOn</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-white">@((MarkupString) post.Text)</p>
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            <p class="text-white text-wrap">@post.Text</p>
-        </div>
-    </div>
-</div>
-<br />
-<br />
-<div class="container-fluid align-content-center">
-    <div class="card bg-dark">
-        <div class="card-header">
-            <h1 class="h1 text-white text-center">Comments</h1>
-        </div>
-        <div class="card-body">
+        <br />
+        <br />
+        <div class="container-fluid align-content-center">
+            <div class="card bg-dark">
+                <div class="card-header">
+                    <h1 class="h1 text-white text-center">Comments</h1>
+                </div>
+                <div class="card-body">
 
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<br />
-<br />
+        <br />
+        <br />
+    </Authorized>
+    <NotAuthorized>
+        <div class="container-fluid">
+            <h1 class="h1 text-white text-center">Welcome to the devSplain Community</h1>
+            <p class="text-white text-center">You must be logged in to view content.</p>
+            <div class="col text-center">
+                <button class="btn btn-lg btn-danger" @onclick="Login">Login or Create Account</button>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     PostModel? post = new PostModel();
@@ -66,5 +80,11 @@
                 Log.Information("User not authorized. Redirecting.");
                 ex.Redirect();
             }
+    }
+
+    private void Login(MouseEventArgs args)
+    {
+        Log.Information("User is attempting to Login");
+        Navigation.NavigateTo("authentication/login");
     }
 }
